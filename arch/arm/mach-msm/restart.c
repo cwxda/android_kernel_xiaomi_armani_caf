@@ -74,7 +74,7 @@ static void *emergency_dload_mode_addr;
 
 /* Download mode master kill-switch */
 static int dload_set(const char *val, struct kernel_param *kp);
-static int download_mode = 1;
+static int download_mode = 0;
 module_param_call(download_mode, dload_set, param_get_int,
 			&download_mode, 0644);
 static int panic_prep_restart(struct notifier_block *this,
@@ -99,11 +99,6 @@ static void set_dload_mode(int on)
 	}
 }
 
-static bool get_dload_mode(void)
-{
-	return dload_mode_enabled;
-}
-
 static void enable_emergency_dload_mode(void)
 {
 	if (emergency_dload_mode_addr) {
@@ -115,10 +110,6 @@ static void enable_emergency_dload_mode(void)
 		__raw_writel(EMERGENCY_DLOAD_MAGIC3,
 				emergency_dload_mode_addr +
 				(2 * sizeof(unsigned int)));
-
-		/* Need disable the pmic wdt, then the emergency dload mode
-		 * will not auto reset. */
-		qpnp_pon_wd_config(0);
 		mb();
 	}
 }
@@ -150,11 +141,6 @@ static void enable_emergency_dload_mode(void)
 {
 	printk(KERN_ERR "dload mode is not enabled on target\n");
 }
-
-static bool get_dload_mode(void)
-{
-	return false;
-}
 #endif
 
 void msm_set_restart_mode(int mode)
@@ -184,6 +170,7 @@ static void __msm_power_off(int lower_pshold)
 #ifdef CONFIG_MSM_DLOAD_MODE
 	set_dload_mode(0);
 #endif
+	__raw_writel(0x0, restart_reason);
 	pm8xxx_reset_pwr_off(0);
 	qpnp_pon_system_pwr_off(PON_POWER_OFF_SHUTDOWN);
 
@@ -269,19 +256,14 @@ static void msm_restart_prepare(const char *cmd)
 
 	pm8xxx_reset_pwr_off(1);
 
-	/* Hard reset the PMIC unless memory contents must be maintained. */
-	if (get_dload_mode() || (cmd != NULL && cmd[0] != '\0'))
-		qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
-	else
-		qpnp_pon_system_pwr_off(PON_POWER_OFF_HARD_RESET);
-
-	if (cmd != NULL) {
++	qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
+	if (in_panic) {
+		__raw_writel(0x77665508, restart_reason);
+	} else if (cmd != NULL) {
 		if (!strncmp(cmd, "bootloader", 10)) {
 			__raw_writel(0x77665500, restart_reason);
 		} else if (!strncmp(cmd, "recovery", 8)) {
 			__raw_writel(0x77665502, restart_reason);
-		} else if (!strcmp(cmd, "rtc")) {
-			__raw_writel(0x77665503, restart_reason);
 		} else if (!strncmp(cmd, "oem-", 4)) {
 			unsigned long code;
 			code = simple_strtoul(cmd + 4, NULL, 16) & 0xff;
@@ -291,6 +273,8 @@ static void msm_restart_prepare(const char *cmd)
 		} else {
 			__raw_writel(0x77665501, restart_reason);
 		}
+	} else {
+		__raw_writel(0x77665501, restart_reason);
 	}
 
 	flush_cache_all();
@@ -362,6 +346,7 @@ static int __init msm_restart_init(void)
 #endif
 	msm_tmr0_base = msm_timer_get_timer0_base();
 	restart_reason = MSM_IMEM_BASE + RESTART_REASON_ADDR;
+	__raw_writel(0x77665510, restart_reason);
 	pm_power_off = msm_power_off;
 
 	if (scm_is_call_available(SCM_SVC_PWR, SCM_IO_DISABLE_PMIC_ARBITER) > 0)
