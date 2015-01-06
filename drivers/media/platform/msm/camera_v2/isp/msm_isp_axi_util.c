@@ -326,7 +326,7 @@ int msm_isp_axi_check_stream_state(
 				stream_info->state == PAUSED ||
 				stream_info->state == RESUME_PENDING ||
 				stream_info->state == RESUMING) &&
-				(stream_cfg_cmd->cmd == STOP_STREAM) {
+				stream_cfg_cmd->cmd == STOP_STREAM) {
 				stream_info->state = ACTIVE;
 			} else {
 				pr_err("%s: Invalid stream state: %d\n",

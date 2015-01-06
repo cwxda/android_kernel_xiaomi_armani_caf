@@ -929,10 +929,10 @@ static int get_rbatt(struct qpnp_bms_chip *chip,
 }
 
 #define DEFAULT_RBATT_SOC	50
-static int estimate_ocv(struct qpnp_bms_chip *chip, int batt_temp)
+static int estimate_ocv(struct qpnp_bms_chip *chip)
 {
 	int ibat_ua, vbat_uv, ocv_est_uv, dropped_uv = 0, rbatt_mohm, rc;
-
+	int batt_temp = 0;
 	rbatt_mohm = get_rbatt(chip, DEFAULT_RBATT_SOC, batt_temp);
 	rc = get_simultaneous_batt_v_and_i(chip, &ibat_ua, &vbat_uv);
 	if (rc) {

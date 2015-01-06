@@ -2090,7 +2090,7 @@ bypass_vbatdet_comp(struct qpnp_chg_chip *chip, bool bypass)
 
 	return rc;
 }
-
+/* Unused function
 static int
 qpnp_chg_is_fast_chg_on(struct qpnp_chg_chip *chip) // Function is added
 {
@@ -2107,7 +2107,7 @@ qpnp_chg_is_fast_chg_on(struct qpnp_chg_chip *chip) // Function is added
 	}
 	return (fast_irq_rt_sts & FAST_CHG_ON_IRQ) ? 1 : 0;
 }
-
+*/
 static irqreturn_t
 qpnp_chg_chgr_chg_fastchg_irq_handler(int irq, void *_chip)
 {

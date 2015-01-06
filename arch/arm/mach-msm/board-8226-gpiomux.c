@@ -11,11 +11,10 @@
  *
  */
 
-
+#include <linux/gpio.h>
 #include <linux/init.h>
 #include <linux/ioport.h>
 #include <mach/board.h>
-#include <mach/gpio.h>
 #include <mach/gpiomux.h>
 #include <mach/socinfo.h>
 
