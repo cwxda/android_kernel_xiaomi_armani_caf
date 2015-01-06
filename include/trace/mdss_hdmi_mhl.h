@@ -8,30 +8,20 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
-/dts-v1/;
-/include/ "msm8226-v2.dtsi"
-/include/ "msm8226-qrd.dtsi"
+#ifndef __MDSS_HDMI_MHL_H__
+#define __MDSS_HDMI_MHL_H__
 
-/ {
-	model = "Qualcomm MSM 8226v2 QRD";
-	compatible = "qcom,msm8226-qrd", "qcom,msm8226", "qcom,qrd";
-	qcom,board-id = <11 0>;
+#include <linux/platform_device.h>
+
+struct msm_hdmi_mhl_ops {
+	u8 (*tmds_enabled)(struct platform_device *pdev);
+	int (*set_mhl_max_pclk)(struct platform_device *pdev, u32 max_val);
+	int (*set_upstream_hpd)(struct platform_device *pdev, uint8_t on);
 };
 
-&mdss_dsi0 {
-	qcom,dsi-pref-prim-pan = <&dsi_auo_720_vid>;
-};
-
-&dsi_auo_720_vid {
-	qcom,cont-splash-enabled;
-};
-
-&dsi_sharp_720_vid {
-	qcom,cont-splash-enabled;
-};
-
-&dsi_auo_nt35521_720_vid {
-	qcom,cont-splash-enabled;
-};
+int msm_hdmi_register_mhl(struct platform_device *pdev,
+			  struct msm_hdmi_mhl_ops *ops, void *data);
+#endif /* __MDSS_HDMI_MHL_H__ */

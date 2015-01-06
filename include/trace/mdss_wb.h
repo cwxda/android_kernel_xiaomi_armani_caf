@@ -8,30 +8,18 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
-/dts-v1/;
-/include/ "msm8226-v2.dtsi"
-/include/ "msm8226-qrd.dtsi"
+#ifndef MDSS_WB_H
+#define MDSS_WB_H
 
-/ {
-	model = "Qualcomm MSM 8226v2 QRD";
-	compatible = "qcom,msm8226-qrd", "qcom,msm8226", "qcom,qrd";
-	qcom,board-id = <11 0>;
+#include <linux/switch.h>
+
+struct mdss_wb_ctrl {
+	struct platform_device *pdev;
+	struct mdss_panel_data pdata;
+	struct switch_dev sdev;
 };
 
-&mdss_dsi0 {
-	qcom,dsi-pref-prim-pan = <&dsi_auo_720_vid>;
-};
-
-&dsi_auo_720_vid {
-	qcom,cont-splash-enabled;
-};
-
-&dsi_sharp_720_vid {
-	qcom,cont-splash-enabled;
-};
-
-&dsi_auo_nt35521_720_vid {
-	qcom,cont-splash-enabled;
-};
+#endif
